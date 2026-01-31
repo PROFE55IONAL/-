@@ -1,161 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Grow Naturally 🌿</title>
+<meta charset="UTF-8" />
+<title>3D Tree with Wind 🌳🦋</title>
 
 <style>
-body {
-  margin: 0;
-  height: 100vh;
-  background: radial-gradient(circle at bottom, #f1fff8, #cfeee0);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  font-family: "Segoe UI", sans-serif;
-  perspective: 1400px;
-}
-
-/* ---------- SCENE ---------- */
-.scene {
-  width: 500px;
-  height: 500px;
-  position: relative;
-  transform-style: preserve-3d;
-}
-
-/* ---------- TREE SVG ---------- */
-.tree {
-  position: absolute;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%) scaleY(0);
-  transform-origin: bottom;
-  animation: growTree 3.5s ease-out forwards;
-}
-
-@keyframes growTree {
-  to { transform: translateX(-50%) scaleY(1); }
-}
-
-/* ---------- BUTTERFLIES ---------- */
-.butterfly {
-  position: absolute;
-  top: 180px;
-  left: 50%;
-  width: 40px;
-  height: 30px;
-  transform-style: preserve-3d;
-}
-
-.butterfly svg {
-  width: 100%;
-  animation: flap 0.4s ease-in-out infinite;
-}
-
-@keyframes flap {
-  0% { transform: scaleX(1); }
-  50% { transform: scaleX(0.7); }
-  100% { transform: scaleX(1); }
-}
-
-/* Natural hovering path */
-.fly1 {
-  animation: hover1 7s ease-in-out infinite;
-}
-.fly2 {
-  animation: hover2 9s ease-in-out infinite;
-}
-.fly3 {
-  animation: hover3 8s ease-in-out infinite;
-}
-
-@keyframes hover1 {
-  0%   { transform: translate(-120px, 0) translateZ(40px); }
-  50%  { transform: translate(100px, -40px) translateZ(90px); }
-  100% { transform: translate(-120px, 0) translateZ(40px); }
-}
-
-@keyframes hover2 {
-  0%   { transform: translate(140px, -20px) translateZ(60px); }
-  50%  { transform: translate(-80px, 30px) translateZ(20px); }
-  100% { transform: translate(140px, -20px) translateZ(60px); }
-}
-
-@keyframes hover3 {
-  0%   { transform: translate(0px, -60px) translateZ(30px); }
-  50%  { transform: translate(60px, 20px) translateZ(80px); }
-  100% { transform: translate(0px, -60px) translateZ(30px); }
-}
-
-/* ---------- MESSAGE ---------- */
-.message {
-  position: absolute;
-  bottom: -40px;
-  width: 100%;
-  text-align: center;
-  font-size: 1.2rem;
-  color: #2e5c4f;
-  opacity: 0;
-  animation: fadeIn 2s ease forwards;
-  animation-delay: 4s;
-}
-
-@keyframes fadeIn {
-  to { opacity: 1; }
-}
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: #eafaf1;
+  }
+  canvas {
+    display: block;
+  }
 </style>
 </head>
 
 <body>
 
-<div class="scene">
+<!-- Three.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
-  <!-- Butterflies -->
-  <div class="butterfly fly1">
-    <svg viewBox="0 0 40 30">
-      <path d="M20 15 C10 0, 0 10, 10 20 C5 30, 20 25, 20 15
-               C20 25, 35 30, 30 20 C40 10, 30 0, 20 15"
-            fill="white"/>
-    </svg>
-  </div>
+<script>
+/* =====================
+   BASIC SCENE SETUP
+===================== */
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0xeafaf1, 8, 25);
 
-  <div class="butterfly fly2">
-    <svg viewBox="0 0 40 30">
-      <path d="M20 15 C10 0, 0 10, 10 20 C5 30, 20 25, 20 15
-               C20 25, 35 30, 30 20 C40 10, 30 0, 20 15"
-            fill="white"/>
-    </svg>
-  </div>
+const camera = new THREE.PerspectiveCamera(
+  60,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  100
+);
+camera.position.set(0, 3, 10);
 
-  <div class="butterfly fly3">
-    <svg viewBox="0 0 40 30">
-      <path d="M20 15 C10 0, 0 10, 10 20 C5 30, 20 25, 20 15
-               C20 25, 35 30, 30 20 C40 10, 30 0, 20 15"
-            fill="white"/>
-    </svg>
-  </div>
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setClearColor(0xeafaf1);
+document.body.appendChild(renderer.domElement);
 
-  <!-- Tree -->
-  <svg class="tree" width="260" height="340" viewBox="0 0 260 340">
-    <!-- Trunk -->
-    <path d="M130 340 C120 260, 140 200, 130 120"
-          stroke="#6b4226" stroke-width="28" fill="none"
-          stroke-linecap="round"/>
+/* =====================
+   LIGHTING
+===================== */
+const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambient);
 
-    <!-- Leaves clusters -->
-    <circle cx="100" cy="120" r="60" fill="#6fcf97"/>
-    <circle cx="160" cy="110" r="65" fill="#5fbf8f"/>
-    <circle cx="130" cy="80" r="70" fill="#7edfb0"/>
-  </svg>
+const sun = new THREE.DirectionalLight(0xffffff, 1);
+sun.position.set(5, 10, 5);
+scene.add(sun);
 
-  <div class="message">
-    Growth isn’t loud 🌱<br>
-    But it’s always happening.
-  </div>
+/* =====================
+   GROUND
+===================== */
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(50, 50),
+  new THREE.MeshStandardMaterial({ color: 0xcfe8dc })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -1;
+scene.add(ground);
 
-</div>
+/* =====================
+   TREE (REAL 3D)
+===================== */
+const tree = new THREE.Group();
+
+/* Trunk */
+const trunk = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.4, 0.6, 4, 16),
+  new THREE.MeshStandardMaterial({ color: 0x6b4226 })
+);
+trunk.position.y = 1;
+tree.add(trunk);
+
+/* Leaves clusters */
+const leafMaterial = new THREE.MeshStandardMaterial({ color: 0x5fbf8f });
+const leaves = [];
+
+for (let i = 0; i < 6; i++) {
+  const leaf = new THREE.Mesh(
+    new THREE.SphereGeometry(1.4, 16, 16),
+    leafMaterial
+  );
+  leaf.position.set(
+    (Math.random() - 0.5) * 1.5,
+    3 + Math.random(),
+    (Math.random() - 0.5) * 1.5
+  );
+  leaves.push(leaf);
+  tree.add(leaf);
+}
+
+scene.add(tree);
+
+/* =====================
+   BUTTERFLIES
+===================== */
+const butterflies = [];
+const butterflyMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+
+for (let i = 0; i < 3; i++) {
+  const wing = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.8, 0.5),
+    butterflyMat
+  );
+  wing.position.set(
+    Math.random() * 4 - 2,
+    3 + Math.random(),
+    Math.random() * 4 - 2
+  );
+  butterflies.push(wing);
+  scene.add(wing);
+}
+
+/* =====================
+   ANIMATION (WIND + LIFE)
+===================== */
+let clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  /* Wind sway for tree */
+  tree.rotation.z = Math.sin(t * 0.6) * 0.05;
+
+  leaves.forEach((leaf, i) => {
+    leaf.position.x += Math.sin(t + i) * 0.001;
+    leaf.position.z += Math.cos(t + i) * 0.001;
+  });
+
+  /* Butterflies natural motion */
+  butterflies.forEach((b, i) => {
+    b.position.x = Math.sin(t + i * 2) * 2;
+    b.position.y = 3 + Math.sin(t * 2 + i) * 0.4;
+    b.position.z = Math.cos(t + i * 2) * 2;
+    b.rotation.y = Math.sin(t * 5) * 0.5;
+  });
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+/* =====================
+   RESIZE
+===================== */
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
 
 </body>
 </html>
