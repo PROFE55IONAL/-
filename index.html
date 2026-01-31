@@ -2,19 +2,23 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Bright 3D Tree & Butterflies 🌳🦋</title>
+<title>Interactive 3D Tree 🌳🦋</title>
 <style>
   body {
     margin: 0;
     overflow: hidden;
     background: #eafff4;
+    touch-action: none; /* important for mobile */
   }
 </style>
 </head>
 
 <body>
 
+<!-- Three.js -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<!-- Orbit Controls -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
 /* =========================
@@ -40,7 +44,18 @@ renderer.toneMappingExposure = 1.25;
 document.body.appendChild(renderer.domElement);
 
 /* =========================
-   LIGHTING (BRIGHT & CLEAN)
+   CONTROLS (INTERACTIVE!)
+========================= */
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;       // smooth motion
+controls.dampingFactor = 0.05;
+controls.enablePan = false;          // no side dragging
+controls.minDistance = 6;
+controls.maxDistance = 14;
+controls.maxPolarAngle = Math.PI / 2.1; // prevent camera going underground
+
+/* =========================
+   LIGHTING
 ========================= */
 scene.add(new THREE.AmbientLight(0xffffff, 0.9));
 
@@ -60,7 +75,7 @@ ground.position.y = -1;
 scene.add(ground);
 
 /* =========================
-   TREE (3D, BRIGHT)
+   TREE
 ========================= */
 const tree = new THREE.Group();
 
@@ -72,7 +87,7 @@ const trunk = new THREE.Mesh(
 trunk.position.y = 1.1;
 tree.add(trunk);
 
-// Leaves (layered spheres)
+// Leaves
 const leaves = [];
 const leafColors = [0x72ff9f, 0x4ee38a, 0x2edc72];
 
@@ -93,7 +108,7 @@ for (let i = 0; i < 8; i++) {
 scene.add(tree);
 
 /* =========================
-   BUTTERFLY (CURVED WINGS)
+   BUTTERFLY (CURVED)
 ========================= */
 function createWingShape() {
   const s = new THREE.Shape();
@@ -146,7 +161,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 /* =========================
-   ANIMATION (WIND + LIFE)
+   ANIMATION LOOP
 ========================= */
 const clock = new THREE.Clock();
 
@@ -154,15 +169,14 @@ function animate() {
   requestAnimationFrame(animate);
   const t = clock.getElapsedTime();
 
-  // 🌬️ Tree wind sway
+  // 🌬️ Wind
   tree.rotation.z = Math.sin(t * 0.6) * 0.05;
-
   leaves.forEach((leaf, i) => {
     leaf.position.x += Math.sin(t + i) * 0.0015;
     leaf.position.z += Math.cos(t + i) * 0.0015;
   });
 
-  // 🦋 Butterfly flight + flap
+  // 🦋 Butterflies
   butterflies.forEach((b, i) => {
     b.position.x = Math.sin(t + i * 2) * 2.2;
     b.position.y = 3 + Math.sin(t * 2 + i) * 0.5;
@@ -172,6 +186,7 @@ function animate() {
     b.userData.rightWing.rotation.z = -Math.sin(t * 12) * 0.6;
   });
 
+  controls.update(); // ← REQUIRED
   renderer.render(scene, camera);
 }
 
