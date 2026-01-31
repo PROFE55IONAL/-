@@ -8,19 +8,20 @@
     margin: 0;
     overflow: hidden;
     background: #eafff4;
-    touch-action: none; /* important for mobile */
+    touch-action: none;
   }
 </style>
 </head>
 
 <body>
 
-<!-- Three.js -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<!-- Orbit Controls -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+<script type="module">
+/* =========================
+   IMPORTS (FIXED)
+========================= */
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js";
 
-<script>
 /* =========================
    SCENE, CAMERA, RENDERER
 ========================= */
@@ -44,15 +45,15 @@ renderer.toneMappingExposure = 1.25;
 document.body.appendChild(renderer.domElement);
 
 /* =========================
-   CONTROLS (INTERACTIVE!)
+   CONTROLS (INTERACTIVE)
 ========================= */
-const controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;       // smooth motion
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.enablePan = false;          // no side dragging
+controls.enablePan = false;
 controls.minDistance = 6;
 controls.maxDistance = 14;
-controls.maxPolarAngle = Math.PI / 2.1; // prevent camera going underground
+controls.maxPolarAngle = Math.PI / 2.1;
 
 /* =========================
    LIGHTING
@@ -79,7 +80,6 @@ scene.add(ground);
 ========================= */
 const tree = new THREE.Group();
 
-// Trunk
 const trunk = new THREE.Mesh(
   new THREE.CylinderGeometry(0.45, 0.7, 4.2, 20),
   new THREE.MeshStandardMaterial({ color: 0x7a4a2e })
@@ -87,7 +87,6 @@ const trunk = new THREE.Mesh(
 trunk.position.y = 1.1;
 tree.add(trunk);
 
-// Leaves
 const leaves = [];
 const leafColors = [0x72ff9f, 0x4ee38a, 0x2edc72];
 
@@ -98,7 +97,7 @@ for (let i = 0; i < 8; i++) {
   );
   leaf.position.set(
     (Math.random() - 0.5) * 2,
-    3 + Math.random() * 1,
+    3 + Math.random(),
     (Math.random() - 0.5) * 2
   );
   leaves.push(leaf);
@@ -108,7 +107,7 @@ for (let i = 0; i < 8; i++) {
 scene.add(tree);
 
 /* =========================
-   BUTTERFLY (CURVED)
+   BUTTERFLY (CURVED WINGS)
 ========================= */
 function createWingShape() {
   const s = new THREE.Shape();
@@ -121,30 +120,24 @@ function createWingShape() {
 
 function createButterfly() {
   const butterfly = new THREE.Group();
-
-  const wingGeo = new THREE.ShapeGeometry(createWingShape());
-  const wingMat = new THREE.MeshStandardMaterial({
+  const geo = new THREE.ShapeGeometry(createWingShape());
+  const mat = new THREE.MeshStandardMaterial({
     color: 0xffffff,
     side: THREE.DoubleSide,
     transparent: true,
     opacity: 0.95
   });
 
-  const leftWing = new THREE.Mesh(wingGeo, wingMat);
-  const rightWing = new THREE.Mesh(wingGeo, wingMat);
+  const lw = new THREE.Mesh(geo, mat);
+  const rw = new THREE.Mesh(geo, mat);
+  lw.rotation.y = Math.PI / 2;
+  rw.rotation.y = -Math.PI / 2;
+  lw.position.x = -0.05;
+  rw.position.x = 0.05;
 
-  leftWing.position.x = -0.05;
-  rightWing.position.x = 0.05;
-
-  leftWing.rotation.y = Math.PI / 2;
-  rightWing.rotation.y = -Math.PI / 2;
-
-  butterfly.add(leftWing);
-  butterfly.add(rightWing);
-
+  butterfly.add(lw, rw);
   butterfly.scale.set(0.7, 0.7, 0.7);
-  butterfly.userData = { leftWing, rightWing };
-
+  butterfly.userData = { lw, rw };
   return butterfly;
 }
 
@@ -169,24 +162,21 @@ function animate() {
   requestAnimationFrame(animate);
   const t = clock.getElapsedTime();
 
-  // 🌬️ Wind
   tree.rotation.z = Math.sin(t * 0.6) * 0.05;
-  leaves.forEach((leaf, i) => {
-    leaf.position.x += Math.sin(t + i) * 0.0015;
-    leaf.position.z += Math.cos(t + i) * 0.0015;
+  leaves.forEach((l, i) => {
+    l.position.x += Math.sin(t + i) * 0.0015;
+    l.position.z += Math.cos(t + i) * 0.0015;
   });
 
-  // 🦋 Butterflies
   butterflies.forEach((b, i) => {
     b.position.x = Math.sin(t + i * 2) * 2.2;
     b.position.y = 3 + Math.sin(t * 2 + i) * 0.5;
     b.position.z = Math.cos(t + i * 2) * 2.2;
-
-    b.userData.leftWing.rotation.z = Math.sin(t * 12) * 0.6;
-    b.userData.rightWing.rotation.z = -Math.sin(t * 12) * 0.6;
+    b.userData.lw.rotation.z = Math.sin(t * 12) * 0.6;
+    b.userData.rw.rotation.z = -Math.sin(t * 12) * 0.6;
   });
 
-  controls.update(); // ← REQUIRED
+  controls.update();
   renderer.render(scene, camera);
 }
 
